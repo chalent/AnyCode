@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shadow DOM案例</title>
+  <style>
+    body {
+      padding: 20px;
+    }
+
+    .wrapper {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <h4>Shadow DOM 接口是关键所在，它可以将一个隐藏的、独立的 DOM 附加到一个元素上。</h4>
+
+  <p>主dom可以修改shadow-host的样式；</p>
+  <p> 在shadow-dom中用:host选择器表示shadow-host；</p>
+  <p>
+    在shadow-dom中用::content选择器表示在template标签中用到的content，只能通过该选择器来操作其后代元素（即通过select来选中的元素，该元素既受主dom样式影响也受template里的style声明的样式::content影响）。；
+  </p>
+  <p> 要更改shadow-root里面元素的样式，可以直接在template标签内添加style标签像平时写样式一样即可。（content里面指代的元素样式要用::content更改）；</p>
+  <p> shadow-dom 和 主dom的样式互不影响；</p>
+
+  <!-- 动态添加子元素 -->
+  <div id="notification"></div>
+
+
+  <div class="wrapper">
+    <div class="txt1">飞流直下三千尺</div>
+    <div class="txt1">疑是银河落九天</div>
+  </div>
+
+
+
+  <script>
+    window.onload = function () {
+      // 使用一：
+      var shadow = document.querySelector('#notification').attachShadow({ mode: "open" });
+
+      shadow.innerHTML = `
+        <style>p {color: #09f;}</style>
+        <p>Hello you use shadow dom</p>
+        <button>确定</button>
+      `
+
+      // 使用二：
+      var inner = document.querySelector(".wrapper")
+      var innerShadow = inner.attachShadow({ mode: "open" })
+
+      var div = document.createElement("div")
+      div.innerHTML = "hello shadow dom l"
+      div.className = "txt2"
+
+      var style = document.createElement("style")
+      style.textContent = `
+        .txt2 { color: #09f; }
+      `
+      innerShadow.appendChild(style)
+      innerShadow.appendChild(div)
+
+
+
+    }
+  </script>
+</body>
+
+</html>
