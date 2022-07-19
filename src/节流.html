@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>节流demo</title>
+  <style>
+    body {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h3>节流原理：如果持续触发事件，每隔一段时间只执行一次函数。</h3>
+  <p>防抖和节流区别：防抖只会在最后一次事件后执行触发函数，节流不管事件多么的频繁，都会保证在规定时间段内触发事件函数。</p>
+
+  <span>请点击按钮：</span>
+  <button id="btn">不同频率点击我</button>
+
+  <p>点击次数：<span class="click-count">0</span></p>
+
+ 
+</body>
+
+<script>
+
+  window.onload = function() {
+
+    const btn = document.getElementById("btn");
+    const elCount = document.querySelector(".click-count")
+    let count = 0;
+
+    btn.addEventListener("click", function() {
+      console.log("按钮点击");
+      count++
+      elCount.innerHTML = count;
+
+      setTimeout(() => {
+        console.log("5s后自动清除计数");
+        count = 0;
+        elCount.innerHTML = count;
+      }, 5000)
+    })
+
+    btn.addEventListener("click",  throttle(() => {
+        runApi(1,2);
+      }, 500))
+
+    function runApi(a, b) {
+      console.log("run a api call", a, b);
+    }
+
+    // 节流函数
+    function throttle(fn, delay) {
+      let timer = null;
+      return () => {
+        if(!timer) {
+          timer = setTimeout(() => {
+            fn.call(this)
+            timer = null;
+          }, delay);
+        }
+      }
+    }
+
+  }
+
+</script>
+</html>
