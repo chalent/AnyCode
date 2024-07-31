@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经典三栏布局</title>
+    <style>
+        .bd {
+            border: solid 1px #ddd;
+        }
+
+        .main {
+            display: flex;
+            justify-content: space-between;
+        }
+        .left, .right {
+            width: 200px;
+            margin: 10px;
+        }
+        .center {
+            flex: 1;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="left bd">左侧</div>
+        <div class="center bd">中间内容</div>
+        <div class="right bd">右侧</div>
+    </div>
+</body>
+</html>
