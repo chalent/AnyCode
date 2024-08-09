@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分片上传示例</title>
+  <style>
+    .content {
+      padding: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="content">
+    <input type="file" name="file" id="file" multiple>
+    <button id="upload" onclick="handleUpload()">上传</button>
+    <p id="hash-progress"></p>
+    <p id="total-slice"></p>
+  </div>
+
+  <script src="./service//reques.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+  <script src="./extends/uploadFile.js"></script>
+  <script>
+
+    let fileName = "",
+      fileHash = "",
+      fileSize = 0,
+      fileChunkListData = [];
+    const HOST = "http://localhost:3000";
+
+    async function handleUpload() {
+      const file = document.getElementById("file").files[0];
+      console.log("这里获取到上传的文件：", file);
+      if (!file) return alert("请选择文件！");
+
+      fileName = file.name;
+      fileSize = file.size;
+      const fileChunkList = createFileChunk(file);  // 将上传文件分片
+      fileHash = await calculateHash(fileChunkList);  // 计算分片HASH
+      fileChunkListData = fileChunkList.map(({ file, size }, index) => {
+        const hash = `${fileHash}-${index}`;
+        return {
+          file,
+          size,
+          fileName,
+          fileHash,
+          hash
+        }
+      });
+      // 调用请求文件上传方法接口
+      await uploadChunks();
+      // 所有分片上传之后，调用请求合并分片接口方法
+      await mergetRequest(fileName, fileHash);
+    }
+
+    // 上传分片
+    async function uploadChunks() {
+      const requestList = fileChunkListData.map((item, index) => {
+        const formData = new FormData();
+        formData.append("file", item.file);
+        formData.append("fileHash", item.fileHash);
+        formData.append("name", item.fileName);
+        formData.append("hash", item.hash);
+        return formData;
+      }).map(formData => {
+        return requestApi({
+          url: HOST + "/upload",
+          method: "POST",
+          body: formData
+        })
+      })
+      await Promise.all(requestList);
+    }
+
+    // 合并分片
+    async function mergetRequest(fileName, fileHash) {
+      await requestApi({
+        url: `${HOST}/merge`,
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=utf-8" },
+        body: JSON.stringify({
+          fileName: fileName,
+          fileHash: fileHash
+        })
+      })
+    }
+
+  </script>
+</body>
+
+</html>
