@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEBGL四边形</title>
+</head>
+
+<body>
+
+  <div>
+    <canvas id="myCanvas" width="500" height="500" style="border: solid 1px #ccc;"></canvas>
+  </div>
+
+  <!-- 顶点着色器代码 -->
+  <script id="vertex-shader" type="x-shader/vertex-shader">
+  attribute vec3 aPos;
+  attribute vec4 aColor;
+  varying vec4 vColor;
+  void main() {
+    float radian = radians(10.0);  // 旋转之后才能看到三维体，否则正面看只是四边形
+    float sin = sin(radian);
+    float cos = cos(radian);
+    mat4 rx = mat4(
+      1, 0, 0, 0,
+      0, cos, -sin, 0,
+      0, sin, cos, 0,
+      0, 0, 0, 1
+    );
+    mat4 ry = mat4(
+      cos, 0, -sin, 0,
+      0, 1, 0, 0,
+      sin, 0, cos, 0,
+      0, 0, 0, 1
+    );
+    
+    gl_PointSize = 10.0;
+    gl_Position = rx * ry * vec4(aPos, 1.0);
+    vColor = aColor; 
+  }
+</script>
+  <!-- 片元着色器代码 -->
+  <script id="fragment-shader" type="x-shader/fragment-shader">
+  precision highp float;
+  varying vec4 vColor;
+  void main() {
+    gl_FragColor = vColor;
+  }
+</script>
+
+  <script type="module">
+    import initShader from "./js/initShader.js";
+    const elCanvas = document.getElementById("myCanvas");
+    const gl = elCanvas.getContext("webgl");
+
+    const program = initShader(gl);
+
+    // 创建缓冲区数据 立方体即z轴-0.5到0.5
+    const vertices = new Float32Array([
+      -0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 
+      -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      
+      -0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+
+      0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+
+      0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 
+
+      -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+    ]);
+    const bufferData = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufferData);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    // 获取变量
+    const aPos = gl.getAttribLocation(program, "aPos");
+    const aColor = gl.getAttribLocation(program, "aColor");
+    // 获取Uniform变量并设置值
+    // const aTranslate = gl.getUniformLocation(program, "aTranslate");
+    // const translateVal = [ 0.2, 0.2 ];
+    // gl.uniform2fv(aTranslate, translateVal);
+
+    // 附加缓冲区数据到变量上，然后激活变量
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 7 * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aColor, 4, gl.FLOAT, false, 7 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.enableVertexAttribArray(aPos);
+    gl.enableVertexAttribArray(aColor);
+
+    // 绘制
+    gl.drawArrays(gl.POINTS, 0, 4);
+    gl.drawArrays(gl.LINE_LOOP, 0, 4);
+    gl.drawArrays(gl.POINTS, 4, 4);
+    gl.drawArrays(gl.LINE_LOOP, 4, 4);
+
+    gl.drawArrays(gl.LINE_LOOP, 8, 2);
+    gl.drawArrays(gl.LINE_LOOP, 10, 2);
+    gl.drawArrays(gl.LINE_LOOP, 12, 2);
+    gl.drawArrays(gl.LINE_LOOP, 14, 2);
+
+  </script>
+
+</body>
+
+</html>

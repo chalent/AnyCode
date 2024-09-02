@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEBGL系列</title>
+</head>
+
+<body>
+  <div>
+    <canvas id="canvas" width="500" height="500" style="border: solid 1px #ccc;"></canvas>
+    <!-- 顶点着色器代码 -->
+    <script id="vertex-shader" type="x-shader/vertex-shader">
+      attribute vec2 aPos;
+      attribute vec4 aColor;
+      varying vec4 vColor;
+      void main() {
+        gl_Position = vec4(aPos, 0.0, 1.0);
+        vColor = aColor; 
+      }
+    </script>
+    <!-- 片元着色器代码 -->
+    <script id="fragment-shader" type="x-shader/fragment-shader">
+      precision highp float;
+      varying vec4 vColor;
+      void main() {
+        gl_FragColor = vColor;
+            
+      }
+    </script>
+
+    <script>
+      // 获取画布并配置webgl
+      const canvas = document.getElementById("canvas");
+      const gl = canvas.getContext("webgl");
+      // 创建着色器 并 绑定着色器代码
+      const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(vertexShader, document.getElementById("vertex-shader").innerText);
+      gl.shaderSource(fragmentShader, document.getElementById("fragment-shader").innerText);
+      // 着色器创建绑定代码完成后，分别对着色器进行编译
+      gl.compileShader(vertexShader);
+      gl.compileShader(fragmentShader);
+      // 程序对象(program)的创建、添加着色器、链接并使用
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      // 创建缓冲区和绑定缓冲区数据 
+      const posColor = new Float32Array([
+        -0.5, -0.5, 1.0,0.0,0.0,1.0,  // 6位：1-2 表示xy坐标；3-6 表示rgba颜色
+        0.5, 0.5, 0.0,1.0,0.0,1.0    // 第二个点的xy坐标...以此类推
+      ]);
+      const posColorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posColorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, posColor, gl.STATIC_DRAW);
+      // 获取动态顶点
+      const aPos = gl.getAttribLocation(program, 'aPos');
+      // 获取动态颜色
+      const aColor = gl.getAttribLocation(program, 'aColor');
+      // 将顶点缓冲区数据附加到动态顶点上
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 0);  // 附加坐标
+      gl.vertexAttribPointer(aColor, 4, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);  // 附加颜色
+      // 激活开启顶点变量
+      gl.enableVertexAttribArray(aPos);
+      gl.enableVertexAttribArray(aColor);
+
+    
+      // 绘制线段（类型选线段，从0个点开始，绘制2个点）
+      gl.drawArrays(gl.LINES, 0, 2);
+    </script>
+  </div>
+</body>
+
+</html>

@@ -81,6 +81,7 @@ server.on("request", async(req, res) => {
     await mergeFileChunk(filePath, fileHash);
     res.status = 200;
     res.end(JSON.stringify("file merged success"));
+    
   }
 
   async function mergeFileChunk(filePath, fileHash) {
