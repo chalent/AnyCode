@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEBGL四边形</title>
+</head>
+
+<body>
+
+  <div>
+    <canvas id="myCanvas" width="500" height="500" style="border: solid 1px #ccc;"></canvas>
+  </div>
+
+  <!-- 顶点着色器代码 -->
+  <script id="vertex-shader" type="x-shader/vertex-shader">
+  attribute vec3 aPos;
+  uniform vec4 uColor;
+  uniform mat4 u_x_matrix;
+  uniform mat4 u_y_matrix;
+
+  void main() {
+    gl_PointSize = 10.0;
+    gl_Position = u_x_matrix * u_y_matrix * vec4(aPos, 1.0);
+  }
+</script>
+  <!-- 片元着色器代码 -->
+  <script id="fragment-shader" type="x-shader/fragment-shader">
+  precision highp float;
+  uniform vec4 uColor;
+  void main() {
+    gl_FragColor = uColor;
+  }
+</script>
+
+  <script type="module">
+    import initShader from "./js/initShader.js";
+    const elCanvas = document.getElementById("myCanvas");
+    const gl = elCanvas.getContext("webgl");
+
+    const program = initShader(gl);
+
+    // 创建缓冲区数据 立方体即z轴-0.5到0.5
+    const vertices = new Float32Array([
+      -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+      -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0,
+    ]);
+    const bufferData = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufferData);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    // 获取变量
+    const aPos = gl.getAttribLocation(program, "aPos");
+    const aColor = gl.getAttribLocation(program, "aColor");
+    // 附加缓冲区数据到变量上，然后激活变量
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 7 * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.enableVertexAttribArray(aPos);
+
+    // 顶点绘制索引数据
+    const indeices = new Int16Array([
+      3, 2, 6, 3, 7, 6,  // 底  
+      0, 4, 7, 0, 3, 7,  // 左 
+      4, 7, 6, 4, 5, 6,  // 后
+      0, 1, 5, 0, 4, 5,  // 上
+      1, 2, 6, 1, 5, 6,  // 右
+      0, 1, 2, 0, 3, 2,  // 前
+    ]);
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indeices, gl.STATIC_DRAW);
+
+    // 绘制
+    gl.drawArrays(gl.POINTS, 0, 4);
+    gl.drawArrays(gl.POINTS, 4, 8);
+
+
+
+    // 绘制图形颜色
+    const faceColors = [
+      [1.0, 0.0, 0.0, 1.0],
+      [0.0, 1.0, 0.0, 1.0],
+      [0.0, 0.0, 1.0, 1.0],
+      [0.5, 0.0, 0.0, 0.5],
+      [0.0, 0.5, 0.0, 0.5],
+      [0.0, 0.0, 0.5, 0.5],
+    ];
+    const uColor = gl.getUniformLocation(program, "uColor");
+    for (let i = 0; i < faceColors.length; i++) {
+      gl.uniform4fv(uColor, faceColors[i]);
+      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, i * 6 * Int16Array.BYTES_PER_ELEMENT);
+    }
+
+    const u_x_matrix = gl.getUniformLocation(program, 'u_x_matrix');
+    const u_y_matrix = gl.getUniformLocation(program, 'u_y_matrix');
+    let deg = 30;  // 角度 30°
+
+    function render() {
+      /** 
+        float radian = radians(10.0);  // 旋转之后才能看到三维体，否则正面看只是四边形
+        float sin = sin(radian);
+        float cos = cos(radian);
+        mat4 rx = mat4(
+          1, 0, 0, 0,
+          0, cos, -sin, 0,
+          0, sin, cos, 0,
+          0, 0, 0, 1
+        );
+        mat4 ry = mat4(
+          cos, 0, -sin, 0,
+          0, 1, 0, 0,
+          sin, 0, cos, 0,
+          0, 0, 0, 1
+        );
+        2* Math.PI = 360°
+        所以：1° = Math.PI / 180
+       */
+      deg += 0.1;
+      const cos = Math.cos(deg * Math.PI / 180);
+      const sin = Math.sin(deg * Math.PI / 180);
+      gl.uniformMatrix4fv(u_x_matrix, false, new Float32Array([
+        1, 0, 0, 0,
+        0, cos, -sin, 0,
+        0, sin, cos, 0,
+        0, 0, 0, 1
+      ]));
+      gl.uniformMatrix4fv(u_y_matrix, false, new Float32Array([
+        cos, 0, -sin, 0,
+        0, 1, 0, 0,
+        sin, 0, cos, 0,
+        0, 0, 0, 1
+      ]));
+
+      for (let i = 0; i < faceColors.length; i++) {
+        gl.uniform4fv(uColor, faceColors[i]);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, i * 6 * Int16Array.BYTES_PER_ELEMENT);
+      }
+
+      window.requestAnimationFrame(render);
+    }
+
+    window.requestAnimationFrame(render);
+
+  </script>
+
+</body>
+
+</html>
