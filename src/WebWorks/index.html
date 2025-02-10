@@ -18,5 +18,11 @@
   <input type="text" id="quota" name="quota" value="1000000">
 
   <button id="generate">Generate primes</button>
+
+  <div>
+    <h4>Web Worker主要用于不阻塞主线程的情况下，在后台执行复杂密集型任务。</h4>
+    <p>&emsp14; &star; Worker与主线程不能共享内存，两者之间只能以postMessage和onMessage通信</p>
+    <p>&emsp14; &star; Worker必须在单独的js文件，传入Worker()方法执行，不能直接内联到html中</p>
+  </div>
 </body>
 </html>

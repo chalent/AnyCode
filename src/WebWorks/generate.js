@@ -11,6 +11,8 @@ addEventListener("message", message => {
 
 // 生成质数(非常低效)
 function generatePrimes(quota) {
+  console.log("开始执行");
+  
   function isPrime(n) {
     for (let c = 2; c <= Math.sqrt(n); ++c) {
       if (n % c === 0) {
@@ -19,7 +21,7 @@ function generatePrimes(quota) {
     }
     return true;
   }
-
+  console.time("longTimeTask");
   const primes = [];
   const maximum = 1000000;
 
@@ -29,4 +31,5 @@ function generatePrimes(quota) {
       primes.push(candidate);
     }
   }
+  console.timeEnd("longTimeTask");
 }

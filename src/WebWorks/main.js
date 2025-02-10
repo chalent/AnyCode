@@ -1,5 +1,6 @@
 window.onload = function() {
 
+  // 
   const worker = new Worker("./generate.js")  // 2022-7-25, chrome,firefox,edge不兼容
 
   // 点击generate时，给worker发送消息
