@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style type="text/css">
+    .block {
+      display: inline-block;
+      width: 100px;
+      height: 50px;
+      border: solid 5px #666;
+
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .pos {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100px;
+      height: 100px;
+    }
+  </style>
+
+  <div class="pos" style="background-color: antiquewhite;z-index: 2;">
+    <div class="pos" style="background-color: aqua;z-index: 1;">
+      <!-- 这个子元素的 z-index 仅在它的父层叠上下文内有效。 -->
+      <!-- 所以这里的z-index: 2并未实现将父元素放在子元素上方 -->
+    </div>
+  </div>
+
+
+</body>
+
+</html>
